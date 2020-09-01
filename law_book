@@ -1,0 +1,84 @@
+                      2020-文书爬虫
+## 文书爬虫思路
+
+**
+
+1.分析需求
+图1
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326133729827.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70#pic_center)
+图2
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2020032613365444.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+需要获取两个图片里的内容
+2.分析请求
+
+图1的请求
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326143241335.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+
+图2的请求
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326143051985.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+3.分析得出需要请求图1的返回值解密出docid，从而获取图2的具体内容
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326145220289.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+4.分析完成，开始模拟请求数据
+模拟对象{
+**pageId**
+s21 :"贷款",
+sortFields:"s50:desc",
+**ciphertext**
+pageNum:"1",
+queryCondition:'[{"key":"s21","value":"贷款"}]',
+cfg:"com.lawyee.judge.dc.parse.dto.SearchDataDsoDTO@queryDoc",
+**__RequestVerificationToken**
+}
+这些对象都可以从js文件中获取最终只有三个值需要找
+pageId，ciphertext，__RequestVerificationToken
+
+1.pageId
+分析网址发现pageId在网址中
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326151848486.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+在js中找到获取pageId方法
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326152058552.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+可以用代码获取$.WebSite.getParameter("pageId");
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326152259939.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+也可以用js里的uuid
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326154012418.png)
+uuid: function(){
+        	var guid = "";
+            for (var i = 1; i <= 32; i++) {
+                var n = Math.floor(Math.random() * 16.0).toString(16);
+                guid += n;
+                // if ((i == 8) || (i == 12) || (i == 16) || (i == 20)) guid +=
+				// "-";
+            }
+            return guid;
+        },
+2._RequestVerificationToken
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326152813990.png)
+js中获取random
+random: function(size){
+        	var str = "",
+        	arr = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        	for(var i=0; i<size; i++){
+        		str += arr[Math.round(Math.random() * (arr.length-1))];
+        	}
+        	return str;
+        },
+
+3.ciphertext
+从图片中分析出ciphertext的值在cipher()函数中
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326154236251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326154337205.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+这里用了des3的加解密，当然万变不离其宗，肯定放在js的某个地方等着调用
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326155428297.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+js找到
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326210022750.png)
+完成图1 的请求
+5.请求成功后得到加密文还有密钥
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326160329109.png)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326155959934.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326145220289.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
+解码成功后的rowkey就是docid
+图2请求成功
+之后依然还是需要调用des3的解码
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326160903914.png)
+流程与上图一致
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200326163149716.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4Mjk0MTEw,size_16,color_FFFFFF,t_70)
